@@ -1,0 +1,29 @@
+name: SafeTrade
+version: 1.0
+main: com.safetrade.SafeTradePlugin
+api-version: "1.21"
+author: Wilczek
+description: Safe player-to-player trading plugin
+
+commands:
+  trade:
+    description: Send a trade request
+    usage: /trade <player>
+    aliases: [handel, wymiana]
+  tradeaccept:
+    description: Accept a trade request
+    usage: /tradeaccept [player]
+    aliases: [tak]
+  tradedeny:
+    description: Deny a trade request
+    usage: /tradedeny [player]
+    aliases: [odrzuc]
+  tradecancel:
+    description: Cancel an active trade or deny a pending request
+    usage: /tradecancel
+    aliases: [nie, anuluj]
+
+permissions:
+  safetrade.use:
+    description: Allows trade commands
+    default: true
