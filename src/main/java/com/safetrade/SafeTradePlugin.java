@@ -2,6 +2,8 @@ package com.safetrade;
 
 import com.safetrade.listeners.TradeListener;
 import com.safetrade.trade.TradeManager;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
@@ -24,13 +26,13 @@ public final class SafeTradePlugin extends JavaPlugin {
                 return true;
             }
             if (args.length != 1) {
-                p.sendMessage("Usage: /trade <player>");
+                p.sendMessage(Component.text("Usage: /trade <player>", NamedTextColor.YELLOW));
                 return true;
             }
 
             Player target = Bukkit.getPlayerExact(args[0]);
             if (target == null) {
-                p.sendMessage("That player is offline.");
+                p.sendMessage(Component.text("That player is offline.", NamedTextColor.RED));
                 return true;
             }
 
@@ -47,7 +49,7 @@ public final class SafeTradePlugin extends JavaPlugin {
 
             Player requester = resolveRequester(target, args);
             if (requester == null) {
-                target.sendMessage("No matching trade request found.");
+                target.sendMessage(Component.text("No matching trade request found.", NamedTextColor.RED));
                 return true;
             }
 
@@ -62,7 +64,7 @@ public final class SafeTradePlugin extends JavaPlugin {
 
             Player requester = resolveRequester(target, args);
             if (requester == null) {
-                target.sendMessage("No matching trade request found.");
+                target.sendMessage(Component.text("No matching trade request found.", NamedTextColor.RED));
                 return true;
             }
 
@@ -87,7 +89,7 @@ public final class SafeTradePlugin extends JavaPlugin {
                 return true;
             }
 
-            p.sendMessage("You do not have an active trade or pending request.");
+            p.sendMessage(Component.text("You do not have an active trade or pending request.", NamedTextColor.RED));
             return true;
         });
     }
@@ -100,16 +102,23 @@ public final class SafeTradePlugin extends JavaPlugin {
     }
 
     private void sendClickableRequest(Player requester, Player target) {
-        target.sendMessage(Component.text(requester.getName() + " wants to trade with you."));
         target.sendMessage(
-                Component.text("[Accept]")
+                Component.text()
+                        .append(Component.text(requester.getName(), NamedTextColor.AQUA))
+                        .append(Component.text(" wants to trade with you.", NamedTextColor.GREEN))
+                        .build()
+        );
+        target.sendMessage(
+                Component.text("[Accept]", NamedTextColor.GREEN)
+                        .decoration(TextDecoration.BOLD, true)
                         .clickEvent(ClickEvent.runCommand("/tradeaccept " + requester.getName()))
-                        .hoverEvent(HoverEvent.showText(Component.text("Accept trade request")))
-                        .append(Component.text(" "))
+                        .hoverEvent(HoverEvent.showText(Component.text("Accept trade request", NamedTextColor.GREEN)))
+                        .append(Component.text("  ", NamedTextColor.GRAY))
                         .append(
-                                Component.text("[Deny]")
+                                Component.text("[Deny]", NamedTextColor.RED)
+                                        .decoration(TextDecoration.BOLD, true)
                                         .clickEvent(ClickEvent.runCommand("/tradedeny " + requester.getName()))
-                                        .hoverEvent(HoverEvent.showText(Component.text("Deny trade request")))
+                                        .hoverEvent(HoverEvent.showText(Component.text("Deny trade request", NamedTextColor.RED)))
                         )
         );
     }

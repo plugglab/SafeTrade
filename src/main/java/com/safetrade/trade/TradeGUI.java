@@ -14,9 +14,9 @@ import java.util.List;
 
 public class TradeGUI {
 
-    private static final String TITLE = "SafeTrade";
-    private static final int[] OFFER_A_SLOTS = {10, 11, 19, 20};
-    private static final int[] OFFER_B_SLOTS = {15, 16, 24, 25};
+    private static final String TITLE = "SafeTrade | Secure Exchange";
+    private static final int[] OFFER_A_SLOTS = {9, 10, 11, 12, 18, 19, 20, 21, 27, 28, 29, 30};
+    private static final int[] OFFER_B_SLOTS = {14, 15, 16, 17, 23, 24, 25, 26, 32, 33, 34, 35};
     public static final int ACCEPT_SLOT_A = 45;
     public static final int ACCEPT_SLOT_B = 53;
     private static final int STATUS_SLOT = 49;
@@ -34,11 +34,12 @@ public class TradeGUI {
         fillOffer(inv, OFFER_A_SLOTS, s.getOfferA());
         fillOffer(inv, OFFER_B_SLOTS, s.getOfferB());
         inv.setItem(4, createStatusItem(s));
-        inv.setItem(9, createPlayerItem(s.getA(), "Left side"));
-        inv.setItem(17, createPlayerItem(s.getB(), "Right side"));
-        inv.setItem(13, createInfoItem("Your items", "Each side can offer up to 4 stacks."));
-        inv.setItem(22, createInfoItem("Acceptance", "Any item change resets both accepts."));
-        inv.setItem(31, createInfoItem("Protection", "Only the owner can remove offered items."));
+        inv.setItem(0, createPlayerItem(s.getA(), "Your trade slots"));
+        inv.setItem(8, createPlayerItem(s.getB(), "Their trade slots"));
+        inv.setItem(5, createInfoItem("Add Items", "Click an item in your inventory to add 1 item."));
+        inv.setItem(13, createInfoItem("Capacity", "Each player can offer up to 12 single items."));
+        inv.setItem(22, createInfoItem("Accept Rules", "Any change resets both accept buttons."));
+        inv.setItem(31, createInfoItem("Remove Items", "Click your own trade slots to take 1 item back."));
         inv.setItem(ACCEPT_SLOT_A, createAcceptItem(s.getA().getName(), s.isAcceptedA()));
         inv.setItem(ACCEPT_SLOT_B, createAcceptItem(s.getB().getName(), s.isAcceptedB()));
         inv.setItem(STATUS_SLOT, createSummaryItem(s));
@@ -47,9 +48,7 @@ public class TradeGUI {
     private static void fillBackground(Inventory inv) {
         ItemStack filler = createNamedItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         int[] fillerSlots = {
-                0, 1, 2, 3, 5, 6, 7, 8,
-                12, 14, 18, 21, 23, 26,
-                27, 28, 29, 30, 32, 33, 34, 35,
+                1, 2, 3, 6, 7,
                 36, 37, 38, 39, 40, 41, 42, 43, 44,
                 46, 47, 48, 50, 51, 52
         };
@@ -79,21 +78,21 @@ public class TradeGUI {
     private static ItemStack createAcceptItem(String playerName, boolean accepted) {
         Material material = accepted ? Material.LIME_CONCRETE : Material.RED_CONCRETE;
         String title = accepted ? playerName + " accepted" : playerName + " pending";
-        String lore = accepted ? "Ready to trade." : "Click your button to accept.";
+        String lore = accepted ? "Waiting for the other player." : "Click to confirm your side.";
         return createNamedItem(material, title, lore);
     }
 
     private static ItemStack createStatusItem(TradeSession s) {
-        String text = s.bothAccepted() ? "Trade confirmed" : "Waiting for both players";
-        return createNamedItem(Material.BELL, text, "Any item change resets both accepts.");
+        String text = s.bothAccepted() ? "Trade locked in" : "Review the offers";
+        return createNamedItem(Material.BELL, text, "Both players must accept the current offer.");
     }
 
     private static ItemStack createSummaryItem(TradeSession s) {
         return createNamedItem(
                 Material.EMERALD,
-                "Finalize Trade",
-                s.getA().getName() + ": " + s.getOfferA().size() + "/4 stacks",
-                s.getB().getName() + ": " + s.getOfferB().size() + "/4 stacks"
+                "Trade Summary",
+                s.getA().getName() + ": " + s.getOfferA().size() + "/12 items",
+                s.getB().getName() + ": " + s.getOfferB().size() + "/12 items"
         );
     }
 
@@ -137,6 +136,10 @@ public class TradeGUI {
             return slot == ACCEPT_SLOT_B;
         }
         return false;
+    }
+
+    public static int getOfferSlotLimit() {
+        return OFFER_A_SLOTS.length;
     }
 
     private static boolean isOfferSlot(int slot, int[] slots) {

@@ -3,6 +3,7 @@ package com.safetrade.listeners;
 import com.safetrade.trade.TradeGUI;
 import com.safetrade.trade.TradeManager;
 import com.safetrade.trade.TradeSession;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,12 +45,24 @@ public class TradeListener implements Listener {
 
         if (e.getClickedInventory() == p.getInventory()) {
             ItemStack item = e.getCurrentItem();
-            if (item == null || getOfferSize(p, s) >= 4) {
+            if (item == null) {
+                return;
+            }
+            if (getOfferSize(p, s) >= TradeGUI.getOfferSlotLimit()) {
+                p.sendMessage(ChatColor.RED + "Your trade offer is full.");
                 return;
             }
 
-            s.addOfferItem(p, item);
-            p.getInventory().setItem(e.getSlot(), null);
+            ItemStack singleItem = item.clone();
+            singleItem.setAmount(1);
+
+            s.addOfferItem(p, singleItem);
+            if (item.getAmount() <= 1) {
+                p.getInventory().setItem(e.getSlot(), null);
+            } else {
+                item.setAmount(item.getAmount() - 1);
+                p.getInventory().setItem(e.getSlot(), item);
+            }
             TradeGUI.update(e.getInventory(), s);
             return;
         }
@@ -61,7 +74,9 @@ public class TradeListener implements Listener {
             }
 
             if (s.removeOfferItem(p, item)) {
-                p.getInventory().addItem(item.clone());
+                ItemStack singleItem = item.clone();
+                singleItem.setAmount(1);
+                p.getInventory().addItem(singleItem);
                 TradeGUI.update(e.getInventory(), s);
             }
         }

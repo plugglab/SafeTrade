@@ -1,6 +1,7 @@
 package com.safetrade.trade;
 
 import com.safetrade.SafeTradePlugin;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -21,53 +22,53 @@ public class TradeManager {
 
     public boolean sendTradeRequest(Player requester, Player target) {
         if (requester.equals(target)) {
-            requester.sendMessage("You cannot trade with yourself.");
+            requester.sendMessage(ChatColor.RED + "You cannot trade with yourself.");
             return false;
         }
         if (getSession(requester) != null || getSession(target) != null) {
-            requester.sendMessage("One of the players is already trading.");
+            requester.sendMessage(ChatColor.RED + "One of the players is already in a trade.");
             return false;
         }
 
         UUID existingRequester = pendingRequests.get(target.getUniqueId());
         if (existingRequester != null) {
             if (existingRequester.equals(requester.getUniqueId())) {
-                requester.sendMessage("Trade request already sent.");
+                requester.sendMessage(ChatColor.YELLOW + "You already sent that trade request.");
             } else {
-                requester.sendMessage("That player already has a pending trade request.");
+                requester.sendMessage(ChatColor.RED + "That player already has a pending trade request.");
             }
             return false;
         }
 
         pendingRequests.put(target.getUniqueId(), requester.getUniqueId());
-        requester.sendMessage("Trade request sent to " + target.getName() + ".");
+        requester.sendMessage(ChatColor.GREEN + "Trade request sent to " + ChatColor.AQUA + target.getName() + ChatColor.GREEN + ".");
         return true;
     }
 
     public boolean acceptRequest(Player target, Player requester) {
         UUID requesterId = pendingRequests.get(target.getUniqueId());
         if (requesterId == null || !requesterId.equals(requester.getUniqueId())) {
-            target.sendMessage("You do not have a trade request from that player.");
+            target.sendMessage(ChatColor.RED + "You do not have a trade request from that player.");
             return false;
         }
 
         pendingRequests.remove(target.getUniqueId());
         createSession(requester, target);
-        requester.sendMessage(target.getName() + " accepted your trade request.");
-        target.sendMessage("Trade started with " + requester.getName() + ".");
+        requester.sendMessage(ChatColor.GREEN + target.getName() + " accepted your trade request.");
+        target.sendMessage(ChatColor.GREEN + "Trade started with " + ChatColor.AQUA + requester.getName() + ChatColor.GREEN + ".");
         return true;
     }
 
     public boolean denyRequest(Player target, Player requester) {
         UUID requesterId = pendingRequests.get(target.getUniqueId());
         if (requesterId == null || !requesterId.equals(requester.getUniqueId())) {
-            target.sendMessage("You do not have a trade request from that player.");
+            target.sendMessage(ChatColor.RED + "You do not have a trade request from that player.");
             return false;
         }
 
         pendingRequests.remove(target.getUniqueId());
-        requester.sendMessage(target.getName() + " denied your trade request.");
-        target.sendMessage("Trade request denied.");
+        requester.sendMessage(ChatColor.RED + target.getName() + " denied your trade request.");
+        target.sendMessage(ChatColor.YELLOW + "Trade request denied.");
         return true;
     }
 
@@ -96,11 +97,11 @@ public class TradeManager {
         if (s.bothAccepted()) {
             boolean success = TradeExecutor.execute(s);
             if (!success) {
-                s.getA().sendMessage("Trade failed.");
-                s.getB().sendMessage("Trade failed.");
+                s.getA().sendMessage(ChatColor.RED + "Trade failed.");
+                s.getB().sendMessage(ChatColor.RED + "Trade failed.");
             } else {
-                s.getA().sendMessage("Trade completed.");
-                s.getB().sendMessage("Trade completed.");
+                s.getA().sendMessage(ChatColor.GREEN + "Trade completed successfully.");
+                s.getB().sendMessage(ChatColor.GREEN + "Trade completed successfully.");
             }
 
             removeSession(s);
@@ -122,8 +123,8 @@ public class TradeManager {
         returnItems(s.getB(), s.getOfferB());
         removeSession(s);
 
-        s.getA().sendMessage("Trade cancelled.");
-        s.getB().sendMessage("Trade cancelled.");
+        s.getA().sendMessage(ChatColor.YELLOW + "Trade cancelled.");
+        s.getB().sendMessage(ChatColor.YELLOW + "Trade cancelled.");
         s.getA().closeInventory();
         s.getB().closeInventory();
     }
