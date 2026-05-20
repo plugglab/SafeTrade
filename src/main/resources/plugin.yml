@@ -22,8 +22,15 @@ commands:
     description: Cancel an active trade or deny a pending request
     usage: /tradecancel
     aliases: [nie, anuluj]
+  tradeadmin:
+    description: Open the SafeTrade admin history and rollback panel
+    usage: /tradeadmin [rollback <id>]
+    aliases: [stadmin]
 
 permissions:
   safetrade.use:
     description: Allows trade commands
     default: true
+  safetrade.admin:
+    description: Allows trade rollback and admin panel access
+    default: op

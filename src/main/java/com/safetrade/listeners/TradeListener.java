@@ -3,12 +3,18 @@ package com.safetrade.listeners;
 import com.safetrade.trade.TradeGUI;
 import com.safetrade.trade.TradeManager;
 import com.safetrade.trade.TradeSession;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerItemHeldEvent;
+import org.bukkit.event.player.PlayerKickEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 
 public class TradeListener implements Listener {
@@ -36,6 +42,11 @@ public class TradeListener implements Listener {
         }
 
         int slot = e.getRawSlot();
+        ClickType click = e.getClick();
+
+        if (click == ClickType.NUMBER_KEY || click == ClickType.SWAP_OFFHAND || click == ClickType.DOUBLE_CLICK) {
+            return;
+        }
 
         if (TradeGUI.isAcceptSlot(p, s, slot)) {
             manager.accept(p);
@@ -48,19 +59,23 @@ public class TradeListener implements Listener {
             if (item == null) {
                 return;
             }
-            if (getOfferSize(p, s) >= TradeGUI.getOfferSlotLimit()) {
-                p.sendMessage(ChatColor.RED + "Your trade offer is full.");
+
+            int requestedAmount = e.getClick() == ClickType.RIGHT ? item.getAmount() : 1;
+            int movableAmount = Math.min(requestedAmount, s.getOfferSpaceFor(p, item));
+            if (movableAmount <= 0) {
+                p.sendMessage(manager.getPlugin().getPrefixedText("messages.trade-offer-full", "&cYour trade offer is full."));
                 return;
             }
 
-            ItemStack singleItem = item.clone();
-            singleItem.setAmount(1);
+            ItemStack movedItem = item.clone();
+            movedItem.setAmount(movableAmount);
 
-            s.addOfferItem(p, singleItem);
-            if (item.getAmount() <= 1) {
+            s.addOfferItem(p, movedItem);
+            manager.onOfferChanged(s);
+            if (item.getAmount() <= movableAmount) {
                 p.getInventory().setItem(e.getSlot(), null);
             } else {
-                item.setAmount(item.getAmount() - 1);
+                item.setAmount(item.getAmount() - movableAmount);
                 p.getInventory().setItem(e.getSlot(), item);
             }
             TradeGUI.update(e.getInventory(), s);
@@ -73,13 +88,29 @@ public class TradeListener implements Listener {
                 return;
             }
 
-            if (s.removeOfferItem(p, item)) {
-                ItemStack singleItem = item.clone();
-                singleItem.setAmount(1);
-                p.getInventory().addItem(singleItem);
+            int removeAmount = e.getClick() == ClickType.RIGHT ? item.getAmount() : 1;
+            ItemStack removedItem = s.removeOfferItem(p, item, removeAmount);
+            if (removedItem != null) {
+                manager.onOfferChanged(s);
+                p.getInventory().addItem(removedItem);
                 TradeGUI.update(e.getInventory(), s);
             }
         }
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent event) {
+        if (!(event.getWhoClicked() instanceof Player player)) {
+            return;
+        }
+        if (!TradeGUI.isTradeInventory(event.getView())) {
+            return;
+        }
+        if (manager.getSession(player) == null) {
+            return;
+        }
+
+        event.setCancelled(true);
     }
 
     @EventHandler
@@ -97,7 +128,36 @@ public class TradeListener implements Listener {
         }
     }
 
-    private int getOfferSize(Player p, TradeSession s) {
-        return p.equals(s.getA()) ? s.getOfferA().size() : s.getOfferB().size();
+    @EventHandler
+    public void onDrop(PlayerDropItemEvent event) {
+        if (manager.getSession(event.getPlayer()) == null) {
+            return;
+        }
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onItemHeld(PlayerItemHeldEvent event) {
+        if (manager.getSession(event.getPlayer()) == null) {
+            return;
+        }
+
+        event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void onQuit(PlayerQuitEvent event) {
+        manager.cancelSession(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onKick(PlayerKickEvent event) {
+        manager.cancelSession(event.getPlayer());
+    }
+
+    @EventHandler
+    public void onDeath(PlayerDeathEvent event) {
+        manager.cancelSession(event.getEntity());
     }
 }

@@ -1,0 +1,82 @@
+settings:
+  request-cooldown-seconds: 3
+  request-expire-seconds: 30
+  trade-complete-delay-seconds: 5
+  # from 1-18
+  max-offer-slots: 18
+  max-history-records: 100
+  rollback-check-ender-chest: false
+
+
+messages:
+  prefix: "&8[&bST&8] "
+  no-permission: "&cYou do not have permission to use this command."
+  usage-trade: "&eUsage: /trade <player>"
+  player-offline: "&cThat player is offline."
+  no-matching-request: "&cNo matching trade request found."
+  no-active-trade-or-request: "&cYou do not have an active trade or pending request."
+  cannot-trade-self: "&cYou cannot trade with yourself."
+  player-already-trading: "&cOne of the players is already in a trade."
+  request-already-sent: "&eYou already sent that trade request."
+  target-has-pending-request: "&cThat player already has a pending trade request."
+  trade-request-sent: "&aTrade request sent to &b{player}&a."
+  request-not-found: "&cYou do not have a trade request from that player."
+  trade-request-accepted: "&a{player} accepted your trade request."
+  trade-started: "&aTrade started with &b{player}&a."
+  trade-request-denied-by-target: "&c{player} denied your trade request."
+  trade-request-denied: "&eTrade request denied."
+  trade-failed: "&cTrade failed."
+  trade-complete: "&aTrade completed successfully."
+  trade-completing: "&eTrade will complete in {seconds}s if nothing changes."
+  trade-cancelled: "&eTrade cancelled."
+  trade-offer-full: "&cYour trade offer is full."
+  request-cooldown: "&cYou must wait {seconds}s before sending another trade request."
+  trade-request-received: "&b{player} &awants to trade with you."
+  admin-trade-not-found: "&cTrade record not found."
+  admin-trade-already-rolled-back: "&eThat trade was already rolled back."
+  admin-rollback-players-offline: "&cBoth players must be online for rollback."
+  admin-rollback-active-trade: "&cRollback is blocked while one of the players is trading."
+  admin-rollback-items-missing: "&cRollback failed because the traded items are no longer fully available."
+  admin-rollback-success: "&aTrade &b{value}&a was rolled back."
+  admin-rollback-player-notice: "&eA previous trade involving you was rolled back by staff."
+  accept-button: "&a[Accept]"
+  deny-button: "&c[Deny]"
+  accept-hover: "&aAccept trade request"
+  deny-hover: "&cDeny trade request"
+
+gui:
+  title: "SafeTrade | Secure Exchange"
+  player-self-lore: "Your trade slots"
+  player-other-lore: "Their trade slots"
+  add-title: "Add Items"
+  add-lore: "Left click adds 1. Right click adds the whole stack."
+  capacity-title: "Capacity"
+  capacity-lore: "Each player can offer up to {max} stacked item slots."
+  accept-rules-title: "Accept Rules"
+  accept-rules-lore: "Any change resets both accept buttons."
+  remove-title: "Remove Items"
+  remove-lore: "Left click removes 1. Right click removes the whole stack."
+  accepted-title: "{player} accepted"
+  pending-title: "{player} pending"
+  accepted-lore: "Waiting for the other player."
+  pending-lore: "Click to confirm your side."
+  status-locked-title: "Trade locked in"
+  status-review-title: "Review the offers"
+  status-lore: "Both players must accept the current offer."
+  summary-title: "Trade Summary"
+  summary-line: "{player}: {amount}/{max} stacks"
+
+admin-gui:
+  title: "SafeTrade Admin"
+  previous-page: "Previous Page"
+  next-page: "Next Page"
+  title-item: "Trade History"
+  page: "Page {page}/{maxPage}"
+  info: "Click a trade to attempt rollback."
+  status-completed: "&aCompleted"
+  status-rolled-back: "&cRolled back"
+  trade-title: "Trade {id}"
+  trade-players: "{playerA} <-> {playerB}"
+  trade-time: "Time: {time}"
+  trade-status: "Status: {status}"
+  trade-action: "Click to rollback this trade."

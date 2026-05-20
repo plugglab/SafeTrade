@@ -1,5 +1,6 @@
 package com.safetrade.trade;
 
+import com.safetrade.SafeTradePlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -14,15 +15,19 @@ import java.util.List;
 
 public class TradeGUI {
 
-    private static final String TITLE = "SafeTrade | Secure Exchange";
-    private static final int[] OFFER_A_SLOTS = {9, 10, 11, 12, 18, 19, 20, 21, 27, 28, 29, 30};
-    private static final int[] OFFER_B_SLOTS = {14, 15, 16, 17, 23, 24, 25, 26, 32, 33, 34, 35};
+    private static final int[] OFFER_A_SLOTS = {9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
+    private static final int[] OFFER_B_SLOTS = {27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44};
     public static final int ACCEPT_SLOT_A = 45;
     public static final int ACCEPT_SLOT_B = 53;
     private static final int STATUS_SLOT = 49;
+    private static SafeTradePlugin plugin;
+
+    public static void init(SafeTradePlugin pluginInstance) {
+        plugin = pluginInstance;
+    }
 
     public static void open(TradeSession s) {
-        Inventory inv = Bukkit.createInventory(null, 54, TITLE);
+        Inventory inv = Bukkit.createInventory(null, 54, getTitle());
         update(inv, s);
         s.getA().openInventory(inv);
         s.getB().openInventory(inv);
@@ -34,12 +39,12 @@ public class TradeGUI {
         fillOffer(inv, OFFER_A_SLOTS, s.getOfferA());
         fillOffer(inv, OFFER_B_SLOTS, s.getOfferB());
         inv.setItem(4, createStatusItem(s));
-        inv.setItem(0, createPlayerItem(s.getA(), "Your trade slots"));
-        inv.setItem(8, createPlayerItem(s.getB(), "Their trade slots"));
-        inv.setItem(5, createInfoItem("Add Items", "Click an item in your inventory to add 1 item."));
-        inv.setItem(13, createInfoItem("Capacity", "Each player can offer up to 12 single items."));
-        inv.setItem(22, createInfoItem("Accept Rules", "Any change resets both accept buttons."));
-        inv.setItem(31, createInfoItem("Remove Items", "Click your own trade slots to take 1 item back."));
+        inv.setItem(0, createPlayerItem(s.getA(), text("gui.player-self-lore", "Your trade slots")));
+        inv.setItem(8, createPlayerItem(s.getB(), text("gui.player-other-lore", "Their trade slots")));
+        inv.setItem(5, createInfoItem(text("gui.add-title", "Add Items"), text("gui.add-lore", "Left click adds 1. Right click adds the whole stack.")));
+        inv.setItem(3, createInfoItem(text("gui.capacity-title", "Capacity"), text("gui.capacity-lore", "Each player can offer up to {max} stacked item slots.")));
+        inv.setItem(2, createInfoItem(text("gui.accept-rules-title", "Accept Rules"), text("gui.accept-rules-lore", "Any change resets both accept buttons.")));
+        inv.setItem(6, createInfoItem(text("gui.remove-title", "Remove Items"), text("gui.remove-lore", "Left click removes 1. Right click removes the whole stack.")));
         inv.setItem(ACCEPT_SLOT_A, createAcceptItem(s.getA().getName(), s.isAcceptedA()));
         inv.setItem(ACCEPT_SLOT_B, createAcceptItem(s.getB().getName(), s.isAcceptedB()));
         inv.setItem(STATUS_SLOT, createSummaryItem(s));
@@ -48,8 +53,7 @@ public class TradeGUI {
     private static void fillBackground(Inventory inv) {
         ItemStack filler = createNamedItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         int[] fillerSlots = {
-                1, 2, 3, 6, 7,
-                36, 37, 38, 39, 40, 41, 42, 43, 44,
+                1, 7,
                 46, 47, 48, 50, 51, 52
         };
         for (int slot : fillerSlots) {
@@ -77,22 +81,34 @@ public class TradeGUI {
 
     private static ItemStack createAcceptItem(String playerName, boolean accepted) {
         Material material = accepted ? Material.LIME_CONCRETE : Material.RED_CONCRETE;
-        String title = accepted ? playerName + " accepted" : playerName + " pending";
-        String lore = accepted ? "Waiting for the other player." : "Click to confirm your side.";
+        String title = accepted
+                ? text("gui.accepted-title", "{player} accepted").replace("{player}", playerName)
+                : text("gui.pending-title", "{player} pending").replace("{player}", playerName);
+        String lore = accepted
+                ? text("gui.accepted-lore", "Waiting for the other player.")
+                : text("gui.pending-lore", "Click to confirm your side.");
         return createNamedItem(material, title, lore);
     }
 
     private static ItemStack createStatusItem(TradeSession s) {
-        String text = s.bothAccepted() ? "Trade locked in" : "Review the offers";
-        return createNamedItem(Material.BELL, text, "Both players must accept the current offer.");
+        String statusText = s.bothAccepted()
+                ? text("gui.status-locked-title", "Trade locked in")
+                : text("gui.status-review-title", "Review the offers");
+        return createNamedItem(Material.BELL, statusText, text("gui.status-lore", "Both players must accept the current offer."));
     }
 
     private static ItemStack createSummaryItem(TradeSession s) {
         return createNamedItem(
                 Material.EMERALD,
-                "Trade Summary",
-                s.getA().getName() + ": " + s.getOfferA().size() + "/12 items",
-                s.getB().getName() + ": " + s.getOfferB().size() + "/12 items"
+                text("gui.summary-title", "Trade Summary"),
+                text("gui.summary-line", "{player}: {amount}/12 stacks")
+                        .replace("{player}", s.getA().getName())
+                        .replace("{amount}", String.valueOf(s.getOfferA().size()))
+                        .replace("{max}", String.valueOf(getOfferSlotLimit())),
+                text("gui.summary-line", "{player}: {amount}/12 stacks")
+                        .replace("{player}", s.getB().getName())
+                        .replace("{amount}", String.valueOf(s.getOfferB().size()))
+                        .replace("{max}", String.valueOf(getOfferSlotLimit()))
         );
     }
 
@@ -115,7 +131,7 @@ public class TradeGUI {
     }
 
     public static boolean isTradeInventory(InventoryView view) {
-        return TITLE.equals(view.getTitle());
+        return getTitle().equals(view.getTitle());
     }
 
     public static boolean isOwnOfferSlot(Player player, TradeSession session, int slot) {
@@ -139,7 +155,11 @@ public class TradeGUI {
     }
 
     public static int getOfferSlotLimit() {
-        return OFFER_A_SLOTS.length;
+        if (plugin == null) {
+            return OFFER_A_SLOTS.length;
+        }
+        int configured = plugin.getConfig().getInt("settings.max-offer-slots", OFFER_A_SLOTS.length);
+        return Math.max(1, Math.min(configured, OFFER_A_SLOTS.length));
     }
 
     private static boolean isOfferSlot(int slot, int[] slots) {
@@ -149,5 +169,14 @@ public class TradeGUI {
             }
         }
         return false;
+    }
+
+    private static String getTitle() {
+        return text("gui.title", "SafeTrade | Secure Exchange");
+    }
+
+    private static String text(String path, String fallback) {
+        String value = plugin == null ? fallback : plugin.getText(path, fallback);
+        return value.replace("{max}", String.valueOf(getOfferSlotLimit()));
     }
 }
