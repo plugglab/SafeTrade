@@ -1,9 +1,10 @@
 name: SafeTrade
-version: 1.0
+version: ${project.version}
 main: com.safetrade.SafeTradePlugin
 api-version: "1.21"
-author: Wilczek
+author: PluggLab Studio
 description: Safe player-to-player trading plugin
+website: https://plugglab.github.io
 
 commands:
   trade:

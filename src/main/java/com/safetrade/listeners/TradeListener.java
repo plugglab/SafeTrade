@@ -1,5 +1,6 @@
 package com.safetrade.listeners;
 
+import com.safetrade.SafeTradePlugin;
 import com.safetrade.trade.TradeGUI;
 import com.safetrade.trade.TradeManager;
 import com.safetrade.trade.TradeSession;
@@ -11,18 +12,40 @@ import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 
 public class TradeListener implements Listener {
 
+    private final SafeTradePlugin plugin;
     private final TradeManager manager;
 
-    public TradeListener(TradeManager manager) {
+    public TradeListener(SafeTradePlugin plugin, TradeManager manager) {
+        this.plugin = plugin;
         this.manager = manager;
+    }
+
+    @EventHandler
+    public void onShiftRightClick(PlayerInteractEntityEvent event) {
+        if (event.getHand() != EquipmentSlot.HAND) {
+            return;
+        }
+        if (!(event.getRightClicked() instanceof Player target)) {
+            return;
+        }
+
+        Player requester = event.getPlayer();
+        if (!requester.isSneaking()) {
+            return;
+        }
+
+        event.setCancelled(true);
+        plugin.sendTradeRequest(requester, target);
     }
 
     @EventHandler
@@ -59,6 +82,9 @@ public class TradeListener implements Listener {
             if (item == null) {
                 return;
             }
+            if (!manager.canOfferItem(p, item)) {
+                return;
+            }
 
             int requestedAmount = e.getClick() == ClickType.RIGHT ? item.getAmount() : 1;
             int movableAmount = Math.min(requestedAmount, s.getOfferSpaceFor(p, item));
@@ -72,10 +98,11 @@ public class TradeListener implements Listener {
 
             s.addOfferItem(p, movedItem);
             manager.onOfferChanged(s);
-            if (item.getAmount() <= movableAmount) {
+            int remainingAmount = item.getAmount() - movableAmount;
+            if (remainingAmount <= 0) {
                 p.getInventory().setItem(e.getSlot(), null);
             } else {
-                item.setAmount(item.getAmount() - movableAmount);
+                item.setAmount(remainingAmount);
                 p.getInventory().setItem(e.getSlot(), item);
             }
             TradeGUI.update(e.getInventory(), s);
@@ -92,7 +119,8 @@ public class TradeListener implements Listener {
             ItemStack removedItem = s.removeOfferItem(p, item, removeAmount);
             if (removedItem != null) {
                 manager.onOfferChanged(s);
-                p.getInventory().addItem(removedItem);
+                p.getInventory().addItem(removedItem).values()
+                        .forEach(leftover -> p.getWorld().dropItemNaturally(p.getLocation(), leftover));
                 TradeGUI.update(e.getInventory(), s);
             }
         }

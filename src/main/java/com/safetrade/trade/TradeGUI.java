@@ -15,11 +15,12 @@ import java.util.List;
 
 public class TradeGUI {
 
-    private static final int[] OFFER_A_SLOTS = {9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26};
-    private static final int[] OFFER_B_SLOTS = {27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44};
+    private static final int[] OFFER_A_SLOTS = {9, 10, 11, 12, 18, 19, 20, 21, 27, 28, 29, 30, 36, 37, 38, 39};
+    private static final int[] OFFER_B_SLOTS = {14, 15, 16, 17, 23, 24, 25, 26, 32, 33, 34, 35, 41, 42, 43, 44};
     public static final int ACCEPT_SLOT_A = 45;
     public static final int ACCEPT_SLOT_B = 53;
     private static final int STATUS_SLOT = 49;
+    private static final int[] CENTER_GLASS_SLOTS = {4, 13, 22, 31, 40, 49};
     private static SafeTradePlugin plugin;
 
     public static void init(SafeTradePlugin pluginInstance) {
@@ -38,12 +39,12 @@ public class TradeGUI {
         fillBackground(inv);
         fillOffer(inv, OFFER_A_SLOTS, s.getOfferA());
         fillOffer(inv, OFFER_B_SLOTS, s.getOfferB());
-        inv.setItem(4, createStatusItem(s));
-        inv.setItem(0, createPlayerItem(s.getA(), text("gui.player-self-lore", "Your trade slots")));
-        inv.setItem(8, createPlayerItem(s.getB(), text("gui.player-other-lore", "Their trade slots")));
-        inv.setItem(5, createInfoItem(text("gui.add-title", "Add Items"), text("gui.add-lore", "Left click adds 1. Right click adds the whole stack.")));
+        fillCenterGlass(inv);
+        inv.setItem(0, createPlayerItem(s.getA(), text("gui.player-offer-lore", "Items offered by this player")));
+        inv.setItem(8, createPlayerItem(s.getB(), text("gui.player-offer-lore", "Items offered by this player")));
+        inv.setItem(2, createInfoItem(text("gui.add-title", "Add Items"), text("gui.add-lore", "Left click adds 1. Right click adds the whole stack.")));
         inv.setItem(3, createInfoItem(text("gui.capacity-title", "Capacity"), text("gui.capacity-lore", "Each player can offer up to {max} stacked item slots.")));
-        inv.setItem(2, createInfoItem(text("gui.accept-rules-title", "Accept Rules"), text("gui.accept-rules-lore", "Any change resets both accept buttons.")));
+        inv.setItem(5, createInfoItem(text("gui.accept-rules-title", "Accept Rules"), text("gui.accept-rules-lore", "Any change resets both accept buttons.")));
         inv.setItem(6, createInfoItem(text("gui.remove-title", "Remove Items"), text("gui.remove-lore", "Left click removes 1. Right click removes the whole stack.")));
         inv.setItem(ACCEPT_SLOT_A, createAcceptItem(s.getA().getName(), s.isAcceptedA()));
         inv.setItem(ACCEPT_SLOT_B, createAcceptItem(s.getB().getName(), s.isAcceptedB()));
@@ -53,11 +54,20 @@ public class TradeGUI {
     private static void fillBackground(Inventory inv) {
         ItemStack filler = createNamedItem(Material.GRAY_STAINED_GLASS_PANE, " ");
         int[] fillerSlots = {
-                1, 7,
-                46, 47, 48, 50, 51, 52
+                1, 7, 46, 47, 48, 50, 51, 52
         };
         for (int slot : fillerSlots) {
             inv.setItem(slot, filler);
+        }
+    }
+
+    private static void fillCenterGlass(Inventory inv) {
+        ItemStack divider = createNamedItem(Material.LIGHT_BLUE_STAINED_GLASS_PANE, " ");
+        for (int slot : CENTER_GLASS_SLOTS) {
+            if (slot == STATUS_SLOT) {
+                continue;
+            }
+            inv.setItem(slot, divider);
         }
     }
 
@@ -72,7 +82,7 @@ public class TradeGUI {
         SkullMeta meta = (SkullMeta) head.getItemMeta();
         if (meta != null) {
             meta.setOwningPlayer(player);
-            meta.setDisplayName(player.getName());
+            meta.setDisplayName(text("gui.player-title", "{player}'s Offer").replace("{player}", player.getName()));
             meta.setLore(List.of(subtitle));
             head.setItemMeta(meta);
         }
@@ -101,11 +111,11 @@ public class TradeGUI {
         return createNamedItem(
                 Material.EMERALD,
                 text("gui.summary-title", "Trade Summary"),
-                text("gui.summary-line", "{player}: {amount}/12 stacks")
+                text("gui.summary-line", "{player}: {amount}/{max} stacks")
                         .replace("{player}", s.getA().getName())
                         .replace("{amount}", String.valueOf(s.getOfferA().size()))
                         .replace("{max}", String.valueOf(getOfferSlotLimit())),
-                text("gui.summary-line", "{player}: {amount}/12 stacks")
+                text("gui.summary-line", "{player}: {amount}/{max} stacks")
                         .replace("{player}", s.getB().getName())
                         .replace("{amount}", String.valueOf(s.getOfferB().size()))
                         .replace("{max}", String.valueOf(getOfferSlotLimit()))

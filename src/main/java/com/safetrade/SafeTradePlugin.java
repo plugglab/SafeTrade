@@ -1,10 +1,12 @@
 package com.safetrade;
 
 import com.safetrade.listeners.AdminTradeListener;
+import com.safetrade.listeners.SystemListener;
 import com.safetrade.trade.AdminTradeGUI;
 import com.safetrade.listeners.TradeListener;
 import com.safetrade.trade.TradeGUI;
 import com.safetrade.trade.TradeManager;
+import com.safetrade.update.VersionChecker;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.Component;
@@ -19,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public final class SafeTradePlugin extends JavaPlugin {
 
     private TradeManager tradeManager;
+    private VersionChecker versionChecker;
 
     @Override
     public void onEnable() {
@@ -26,9 +29,12 @@ public final class SafeTradePlugin extends JavaPlugin {
         TradeGUI.init(this);
         AdminTradeGUI.init(this);
         this.tradeManager = new TradeManager(this);
+        this.versionChecker = new VersionChecker(this);
 
-        Bukkit.getPluginManager().registerEvents(new TradeListener(tradeManager), this);
+        Bukkit.getPluginManager().registerEvents(new TradeListener(this, tradeManager), this);
         Bukkit.getPluginManager().registerEvents(new AdminTradeListener(), this);
+        Bukkit.getPluginManager().registerEvents(new SystemListener(this), this);
+        versionChecker.checkForUpdates();
 
         getCommand("trade").setExecutor((sender, cmd, label, args) -> {
             if (!(sender instanceof Player p)) {
@@ -45,9 +51,7 @@ public final class SafeTradePlugin extends JavaPlugin {
                 return true;
             }
 
-            if (tradeManager.sendTradeRequest(p, target)) {
-                sendClickableRequest(p, target);
-            }
+            sendTradeRequest(p, target);
             return true;
         });
 
@@ -135,6 +139,17 @@ public final class SafeTradePlugin extends JavaPlugin {
         return tradeManager.getRequester(target);
     }
 
+    public boolean sendTradeRequest(Player requester, Player target) {
+        if (!tradeManager.sendTradeRequest(requester, target)) {
+            return false;
+        }
+        Player pendingRequester = tradeManager.getRequester(target);
+        if (pendingRequester != null && pendingRequester.getUniqueId().equals(requester.getUniqueId())) {
+            sendClickableRequest(requester, target);
+        }
+        return true;
+    }
+
     private void sendClickableRequest(Player requester, Player target) {
         String requestText = format("messages.trade-request-received", "&a{player} wants to trade with you.", requester.getName());
         String acceptLabel = getText("messages.accept-button", "&a[Accept]");
@@ -210,6 +225,10 @@ public final class SafeTradePlugin extends JavaPlugin {
 
     public TradeManager getTradeManager() {
         return tradeManager;
+    }
+
+    public VersionChecker getVersionChecker() {
+        return versionChecker;
     }
 
     private TradeSessionWrapper getTradeSessionWrapper(Player player) {
