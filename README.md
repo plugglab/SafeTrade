@@ -1,30 +1,23 @@
 # SafeTrade
 
-SafeTrade is a player-to-player trading plugin for Paper-based Minecraft servers.
+SafeTrade is a secure and lightweight trading system for Minecraft servers that allows players to safely exchange items through a simple and reliable interface.
 
-## Compatibility
+## About
 
-- Server engine: Paper and Paper-compatible forks
-- API target: `1.21`
-- Tested build dependency: `paper-api: 1.21.3-R0.1-SNAPSHOT`
-- Java runtime: `21`
-- Folia: not supported
-- Vault: optional, enabled when present
-
-## Supported versions
-
-The plugin is built against the Paper 1.21.3 API and Java 21. In practical terms, that means it is intended for:
-
-- Minecraft/Paper `1.21.x`
-- Java `21`
-
-It is not declared for older Minecraft major versions or older Java runtimes.
+The plugin is designed to provide stable and predictable player-to-player trades, reducing common issues like misclicks, duplication exploits, or unclear trade states.
 
 ## Features
 
-- Secure player-to-player item trading
-- Optional money trades through Vault
-- Direct player-to-player money transfers via `/tradepay`
-- Trade safety hold before release
-- Trade history and rollback panel
-- Discord webhook notifications
+- Secure trade system
+- GUI-based trading interface
+- Anti-exploit safeguards
+- Lightweight and optimized performance
+- Simple player-to-player interactions
+
+## Download
+
+- [Modrinth: SafeTrade](https://modrinth.com/plugin/safetrade)
+
+## Purpose
+
+To provide a stable and fair trading experience for Minecraft servers.
