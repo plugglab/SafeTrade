@@ -18,6 +18,8 @@ public class SystemListener implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
+        plugin.getTradeManager().releaseExpiredHolds(player);
+
         if (!player.hasPermission("safetrade.admin")) {
             return;
         }

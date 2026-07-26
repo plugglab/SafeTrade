@@ -1,7 +1,12 @@
 settings:
   request-cooldown-seconds: 3
   request-expire-seconds: 30
+  trade-start-cooldown-seconds: 10
   trade-complete-delay-seconds: 5
+  safety-hold-seconds: 120
+  discord-webhook-url: ""
+  enable-money-trades: true
+  max-money-per-player: 0
   require-same-world: true
   max-trade-distance: 10
   blocked-worlds: []
@@ -25,6 +30,7 @@ settings:
   max-history-records: 100
   rollback-max-age-hours: 0
   rollback-check-ender-chest: false
+  send-webhook-on-trade: true
   # i dont recomend to change anything here but u can
   version-check:
     enabled: true
@@ -51,8 +57,15 @@ messages:
   trade-request-denied: "&eTrade request denied."
   trade-failed: "&cTrade failed."
   trade-complete: "&aTrade completed successfully."
+  trade-safety-released: "&aThe safety hold expired and your trade items were released."
   trade-completing: "&eTrade will complete in {seconds}s if nothing changes."
   trade-cancelled: "&eTrade cancelled."
+  trade-abuse-cooldown: "&cOne of the players must wait before starting another trade."
+  usage-trade-money: "&eUsage: /trade money <amount>"
+  money-invalid: "&cEnter a valid amount."
+  money-insufficient: "&cYou do not have enough money."
+  money-too-high: "&cThat amount exceeds the limit: {value}"
+  vault-unavailable: "&cMoney trades are disabled because Vault is unavailable."
   trade-offer-full: "&cYour trade offer is full."
   trade-blocked-item: "&cThat item cannot be traded: &b{value}"
   trade-blocked-world: "&cTrading is blocked in this world."
@@ -64,8 +77,9 @@ messages:
   trade-request-received: "&b{player} &awants to trade with you."
   admin-trade-not-found: "&cTrade record not found."
   admin-trade-already-rolled-back: "&eThat trade was already rolled back."
-  admin-rollback-players-offline: "&cBoth players must be online for rollback."
+  admin-rollback-players-offline: "&cAt least one player must be online for rollback."
   admin-rollback-active-trade: "&cRollback is blocked while one of the players is trading."
+  admin-rollback-hold-missing: "&cRollback failed because that trade is no longer on hold."
   admin-rollback-too-old: "&cRollback failed because this trade is older than the allowed rollback age."
   admin-rollback-items-missing: "&cRollback failed because the traded items are no longer fully available."
   admin-rollback-success: "&aTrade &b{value}&a was rolled back."
@@ -76,9 +90,15 @@ messages:
   deny-button: "&c[Deny]"
   accept-hover: "&aAccept trade request"
   deny-hover: "&cDeny trade request"
+  usage-trade-pay: "&eUsage: /tradepay <player> <amount>"
+  money-pay-sent: "&aYou sent &e{amount}&a to &b{player}&a."
+  money-pay-received: "&aYou received &e{amount}&a from &b{player}&a."
+  money-pay-failed: "&cMoney transfer failed."
+  money-pay-self: "&cYou cannot send money to yourself."
 
 gui:
   title: "SafeTrade | Secure Exchange"
+  safety-title: "SafeTrade | Safety Hold"
   player-title: "{player}'s Offer"
   player-offer-lore: "Items offered by this player"
   add-title: "Add Items"
@@ -98,6 +118,9 @@ gui:
   status-lore: "Both players must accept the current offer."
   summary-title: "Trade Summary"
   summary-line: "{player}: {amount}/{max} stacks"
+  safety-hold-offer: "Held for safety"
+  safety-countdown: "Releasing in {seconds}s"
+  safety-shield-title: "Safe release"
 
 admin-gui:
   title: "SafeTrade Admin"

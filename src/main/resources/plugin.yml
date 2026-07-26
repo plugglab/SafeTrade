@@ -2,31 +2,43 @@ name: SafeTrade
 version: ${project.version}
 main: com.safetrade.SafeTradePlugin
 api-version: "1.21"
+folia-supported: false
+load: POSTWORLD
 author: PluggLab Studio
 description: Safe player-to-player trading plugin
 website: https://plugglab.github.io
+softdepend:
+  - Vault
 
 commands:
   trade:
     description: Send a trade request
     usage: /trade <player>
-    aliases: [handel, wymiana]
+    aliases: [handel, wymiana, exchange, swap, barter]
   tradeaccept:
     description: Accept a trade request
     usage: /tradeaccept [player]
-    aliases: [tak]
+    aliases: [tak, accept, agree]
   tradedeny:
     description: Deny a trade request
     usage: /tradedeny [player]
-    aliases: [odrzuc]
+    aliases: [odrzuc, deny, decline]
   tradecancel:
     description: Cancel an active trade or deny a pending request
     usage: /tradecancel
-    aliases: [nie, anuluj]
+    aliases: [nie, anuluj, cancel, stop]
   tradeadmin:
     description: Open the SafeTrade admin history and rollback panel
     usage: /tradeadmin [rollback <id>]
-    aliases: [stadmin]
+    aliases: [stadmin, admintrade, tradehistory]
+  tradehold:
+    description: Show what is currently on safety hold
+    usage: /tradehold
+    aliases: [hold, tradeescrow]
+  tradecash:
+    description: Create a cash paper that can be redeemed for money
+    usage: /tradecash <amount>
+    aliases: [cashtrade, cashpaper]
 
 permissions:
   safetrade.use:

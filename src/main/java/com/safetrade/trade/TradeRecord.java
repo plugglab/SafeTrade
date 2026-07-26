@@ -14,10 +14,12 @@ public record TradeRecord(
         String playerBName,
         List<ItemStack> offerA,
         List<ItemStack> offerB,
+        double moneyA,
+        double moneyB,
         boolean rolledBack
 ) {
 
     public TradeRecord withRolledBack(boolean rolledBack) {
-        return new TradeRecord(id, createdAt, playerAId, playerAName, playerBId, playerBName, offerA, offerB, rolledBack);
+        return new TradeRecord(id, createdAt, playerAId, playerAName, playerBId, playerBName, offerA, offerB, moneyA, moneyB, rolledBack);
     }
 }

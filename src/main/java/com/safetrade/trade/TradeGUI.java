@@ -44,6 +44,7 @@ public class TradeGUI {
         inv.setItem(8, createPlayerItem(s.getB(), text("gui.player-offer-lore", "Items offered by this player")));
         inv.setItem(2, createInfoItem(text("gui.add-title", "Add Items"), text("gui.add-lore", "Left click adds 1. Right click adds the whole stack.")));
         inv.setItem(3, createInfoItem(text("gui.capacity-title", "Capacity"), text("gui.capacity-lore", "Each player can offer up to {max} stacked item slots.")));
+        inv.setItem(4, createInfoItem(text("gui.money-title", "Money Bet"), text("gui.money-lore", "Click to set a custom money amount for this trade.")));
         inv.setItem(5, createInfoItem(text("gui.accept-rules-title", "Accept Rules"), text("gui.accept-rules-lore", "Any change resets both accept buttons.")));
         inv.setItem(6, createInfoItem(text("gui.remove-title", "Remove Items"), text("gui.remove-lore", "Left click removes 1. Right click removes the whole stack.")));
         inv.setItem(ACCEPT_SLOT_A, createAcceptItem(s.getA().getName(), s.isAcceptedA()));
@@ -118,7 +119,13 @@ public class TradeGUI {
                 text("gui.summary-line", "{player}: {amount}/{max} stacks")
                         .replace("{player}", s.getB().getName())
                         .replace("{amount}", String.valueOf(s.getOfferB().size()))
-                        .replace("{max}", String.valueOf(getOfferSlotLimit()))
+                        .replace("{max}", String.valueOf(getOfferSlotLimit())),
+                text("gui.summary-line", "{player}: {amount} money")
+                        .replace("{player}", s.getA().getName())
+                        .replace("{amount}", formatMoney(s.getMoneyA())),
+                text("gui.summary-line", "{player}: {amount} money")
+                        .replace("{player}", s.getB().getName())
+                        .replace("{amount}", formatMoney(s.getMoneyB()))
         );
     }
 
@@ -188,5 +195,12 @@ public class TradeGUI {
     private static String text(String path, String fallback) {
         String value = plugin == null ? fallback : plugin.getText(path, fallback);
         return value.replace("{max}", String.valueOf(getOfferSlotLimit()));
+    }
+
+    private static String formatMoney(double amount) {
+        if (Math.rint(amount) == amount) {
+            return String.valueOf((long) amount);
+        }
+        return String.valueOf(amount);
     }
 }

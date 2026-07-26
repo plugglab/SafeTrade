@@ -55,6 +55,8 @@ public class TradeHistoryStore {
                         tradeSection.getString("player-b.name", "Unknown"),
                         cloneItems(tradeSection.getList("offer-a", List.of())),
                         cloneItems(tradeSection.getList("offer-b", List.of())),
+                        tradeSection.getDouble("money-a", 0D),
+                        tradeSection.getDouble("money-b", 0D),
                         tradeSection.getBoolean("rolled-back", false)
                 );
                 records.put(id, record);
@@ -64,8 +66,9 @@ public class TradeHistoryStore {
     }
 
     public synchronized TradeRecord addRecord(TradeSession session) {
+        String id = UUID.randomUUID().toString().substring(0, 8);
         TradeRecord record = new TradeRecord(
-                UUID.randomUUID().toString().substring(0, 8),
+                id,
                 System.currentTimeMillis(),
                 session.getA().getUniqueId(),
                 session.getA().getName(),
@@ -73,9 +76,12 @@ public class TradeHistoryStore {
                 session.getB().getName(),
                 cloneItems(session.getOfferA()),
                 cloneItems(session.getOfferB()),
+                session.getMoneyA(),
+                session.getMoneyB(),
                 false
         );
         records.put(record.id(), record);
+        session.setHistoryId(id);
         trimToConfiguredLimit();
         save();
         return record;
@@ -138,6 +144,8 @@ public class TradeHistoryStore {
             config.set(basePath + ".player-b.name", record.playerBName());
             config.set(basePath + ".offer-a", cloneItems(record.offerA()));
             config.set(basePath + ".offer-b", cloneItems(record.offerB()));
+            config.set(basePath + ".money-a", record.moneyA());
+            config.set(basePath + ".money-b", record.moneyB());
             config.set(basePath + ".rolled-back", record.rolledBack());
         }
 

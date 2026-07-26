@@ -9,17 +9,8 @@ import java.util.Map;
 public class TradeExecutor {
 
     public static boolean execute(TradeSession s) {
-        give(s.getA(), s.getOfferB());
-        give(s.getB(), s.getOfferA());
+        // Items are intentionally not delivered here. They stay in the safety hold
+        // until the configured timer expires.
         return true;
-    }
-
-    private static void give(Player p, List<ItemStack> items) {
-        for (ItemStack item : items) {
-            Map<Integer, ItemStack> leftovers = p.getInventory().addItem(item.clone());
-            for (ItemStack leftover : leftovers.values()) {
-                p.getWorld().dropItemNaturally(p.getLocation(), leftover);
-            }
-        }
     }
 }

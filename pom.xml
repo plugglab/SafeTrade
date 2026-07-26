@@ -6,11 +6,11 @@
 
     <groupId>com.safetrade</groupId>
     <artifactId>SafeTrade</artifactId>
-    <version>2.0.0</version>
+    <version>3.0</version>
     <packaging>jar</packaging>
 
     <name>SafeTrade</name>
-    <description>Bezpieczny plugin do handlu między graczami</description>
+    <description>Bezpieczny plugin do handlu miÄ™dzy graczami</description>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -20,13 +20,10 @@
     </properties>
 
     <repositories>
-        <!-- PaperMC Repository -->
         <repository>
             <id>papermc</id>
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
-
-        <!-- Spigot Repository (fallback) -->
         <repository>
             <id>spigotmc-repo</id>
             <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots/</url>
@@ -34,29 +31,29 @@
     </repositories>
 
     <dependencies>
-        <!-- Paper API 1.21.11 -->
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>1.21.3-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
-        <!-- Adnotacje do zdarzeń (opcjonalnie, ale zalecane) -->
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
             <version>24.1.0</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.11.0</version>
+        </dependency>
     </dependencies>
 
     <build>
         <finalName>${project.name}-${project.version}</finalName>
         <sourceDirectory>src/main/java</sourceDirectory>
-
         <plugins>
-            <!-- Maven Compiler Plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -67,8 +64,6 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-
-            <!-- Maven Shade Plugin - do pakowania pluginu -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -85,9 +80,11 @@
                                 <filter>
                                     <artifact>*:*</artifact>
                                     <excludes>
+                                        <exclude>META-INF/MANIFEST.MF</exclude>
                                         <exclude>META-INF/*.SF</exclude>
                                         <exclude>META-INF/*.DSA</exclude>
                                         <exclude>META-INF/*.RSA</exclude>
+                                        <exclude>META-INF/versions/9/module-info.class</exclude>
                                     </excludes>
                                 </filter>
                             </filters>
@@ -95,8 +92,6 @@
                     </execution>
                 </executions>
             </plugin>
-
-            <!-- Maven Resource Plugin - do kopiowania plugin.yml -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -105,8 +100,6 @@
                     <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
-
-            <!-- Maven JAR Plugin - do dodania meta-inf -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
@@ -120,7 +113,6 @@
                 </configuration>
             </plugin>
         </plugins>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

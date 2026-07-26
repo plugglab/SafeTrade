@@ -19,6 +19,15 @@ public class TradeSession {
     private boolean acceptB = false;
     private boolean completing = false;
     private int completionTaskId = -1;
+    private boolean safetyActive = false;
+    private int safetyTaskId = -1;
+    private long safetyEndsAt = 0L;
+    private double moneyA = 0D;
+    private double moneyB = 0D;
+    private String moneyInputA = "";
+    private String moneyInputB = "";
+    private boolean suppressNextTradeClose = false;
+    private String historyId = "";
 
     public TradeSession(Player a, Player b) {
         this.a = a;
@@ -182,6 +191,85 @@ public class TradeSession {
 
     public void setCompletionTaskId(int completionTaskId) {
         this.completionTaskId = completionTaskId;
+    }
+
+    public boolean isSafetyActive() {
+        return safetyActive;
+    }
+
+    public void setSafetyActive(boolean safetyActive) {
+        this.safetyActive = safetyActive;
+    }
+
+    public int getSafetyTaskId() {
+        return safetyTaskId;
+    }
+
+    public void setSafetyTaskId(int safetyTaskId) {
+        this.safetyTaskId = safetyTaskId;
+    }
+
+    public long getSafetyEndsAt() {
+        return safetyEndsAt;
+    }
+
+    public void setSafetyEndsAt(long safetyEndsAt) {
+        this.safetyEndsAt = safetyEndsAt;
+    }
+
+    public long getSafetySecondsRemaining() {
+        if (!safetyActive) {
+            return 0L;
+        }
+        return Math.max(0L, (safetyEndsAt - System.currentTimeMillis() + 999L) / 1000L);
+    }
+
+    public double getMoneyA() {
+        return moneyA;
+    }
+
+    public void setMoneyA(double moneyA) {
+        this.moneyA = Math.max(0D, moneyA);
+    }
+
+    public double getMoneyB() {
+        return moneyB;
+    }
+
+    public void setMoneyB(double moneyB) {
+        this.moneyB = Math.max(0D, moneyB);
+    }
+
+    public String getMoneyInput(Player p) {
+        return p.equals(a) ? moneyInputA : moneyInputB;
+    }
+
+    public void setMoneyInput(Player p, String value) {
+        if (p.equals(a)) {
+            moneyInputA = value == null ? "" : value;
+        } else if (p.equals(b)) {
+            moneyInputB = value == null ? "" : value;
+        }
+    }
+
+    public void clearMoneyInput(Player p) {
+        setMoneyInput(p, "");
+    }
+
+    public boolean isSuppressNextTradeClose() {
+        return suppressNextTradeClose;
+    }
+
+    public void setSuppressNextTradeClose(boolean suppressNextTradeClose) {
+        this.suppressNextTradeClose = suppressNextTradeClose;
+    }
+
+    public String getHistoryId() {
+        return historyId;
+    }
+
+    public void setHistoryId(String historyId) {
+        this.historyId = historyId == null ? "" : historyId;
     }
 
     private List<ItemStack> getOffer(Player p) {
