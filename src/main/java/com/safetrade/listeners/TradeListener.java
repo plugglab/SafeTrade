@@ -82,6 +82,10 @@ public class TradeListener implements Listener {
             player.sendMessage(manager.getPlugin().getPrefixedText("messages.money-pay-failed", "&cMoney transfer failed."));
             return;
         }
+        if (!TradeCashItem.markRedeemed(item)) {
+            player.sendMessage(manager.getPlugin().getPrefixedText("messages.money-invalid", "&cThat cash paper was already redeemed."));
+            return;
+        }
 
         int newAmount = item.getAmount() - 1;
         if (newAmount <= 0) {
@@ -110,6 +114,10 @@ public class TradeListener implements Listener {
             e.setCancelled(true);
             if (!manager.depositMoney(p, amount)) {
                 p.sendMessage(manager.getPlugin().getPrefixedText("messages.money-pay-failed", "&cMoney transfer failed."));
+                return;
+            }
+            if (!TradeCashItem.markRedeemed(item)) {
+                p.sendMessage(manager.getPlugin().getPrefixedText("messages.money-invalid", "&cThat cash paper was already redeemed."));
                 return;
             }
 

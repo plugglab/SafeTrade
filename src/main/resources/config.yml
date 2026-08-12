@@ -95,6 +95,14 @@ messages:
   money-pay-received: "&aYou received &e{amount}&a from &b{player}&a."
   money-pay-failed: "&cMoney transfer failed."
   money-pay-self: "&cYou cannot send money to yourself."
+  # Gotówka handlowa (/tradecash) - tłumaczenie PL
+  usage-tradecash: "&eUżycie: /tradecash <kwota>"
+  tradecash-created: "&aUtworzono gotówkę handlową o wartości &e{value}&a."
+  tradecash-redeemed: "&aOdebrano &e{value}&a z gotówki handlowej."
+  inventory-full: "&cTwój ekwipunek jest pełny."
+  cash-item-name: "&eGotówka Handlowa"
+  cash-item-value-lore: "&7Wartość: &a{value}"
+  cash-item-owner-lore: "&7Właściciel: &f{owner}"
 
 gui:
   title: "SafeTrade | Secure Exchange"

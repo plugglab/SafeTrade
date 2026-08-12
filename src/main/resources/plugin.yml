@@ -36,9 +36,9 @@ commands:
     usage: /tradehold
     aliases: [hold, tradeescrow]
   tradecash:
-    description: Create a cash paper that can be redeemed for money
+    description: Create a cash paper that can be redeemed for money | Tworzy gotówkę handlową, którą można wymienić na pieniądze
     usage: /tradecash <amount>
-    aliases: [cashtrade, cashpaper]
+    aliases: [cashtrade, cashpaper, gotowka, gotówka]
 
 permissions:
   safetrade.use:

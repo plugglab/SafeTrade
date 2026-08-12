@@ -10,19 +10,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class VersionChecker {
-
-    private static final Pattern TAG_NAME_PATTERN = Pattern.compile("\"tag_name\"\\s*:\\s*\"([^\"]+)\"");
-    private static final Pattern NAME_PATTERN = Pattern.compile("\"name\"\\s*:\\s*\"([^\"]+)\"");
-    private static final Pattern HTML_URL_PATTERN = Pattern.compile("\"html_url\"\\s*:\\s*\"([^\"]+)\"");
 
     private final SafeTradePlugin plugin;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(10))
             .build();
+
     private volatile boolean updateAvailable;
     private volatile String latestVersion = "";
     private volatile String latestUrl = "";
@@ -89,21 +84,22 @@ public class VersionChecker {
             return null;
         }
 
-        String version = findFirst(response, TAG_NAME_PATTERN);
-        String url = findFirst(response, HTML_URL_PATTERN);
+        String version = extractJsonField(response, "tag_name");
+        String url = extractJsonField(response, "html_url");
         if (version.isBlank()) {
-            version = findFirst(response, NAME_PATTERN);
+            version = extractJsonField(response, "name");
         }
         return version.isBlank() ? null : new ReleaseInfo(version, url);
     }
 
     private ReleaseInfo fetchLatestTag(String repo) throws IOException, InterruptedException {
         String response = send("https://api.github.com/repos/" + repo + "/tags");
-        if (response == null || response.isBlank()) {
+        if (response == null || response.isBlank() || !response.startsWith("[")) {
             return null;
         }
 
-        String version = findFirst(response, NAME_PATTERN);
+        // Pobieramy pierwszy tag z tablicy JSON
+        String version = extractJsonField(response, "name");
         if (version.isBlank()) {
             return null;
         }
@@ -114,23 +110,37 @@ public class VersionChecker {
         HttpRequest request = HttpRequest.newBuilder(URI.create(url))
                 .GET()
                 .header("Accept", "application/vnd.github+json")
-                .header("User-Agent", "SafeTrade-VersionChecker")
+                .header("User-Agent", "SafeTrade-Plugin-VersionChecker")
                 .timeout(Duration.ofSeconds(15))
                 .build();
 
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() >= 400) {
+            plugin.getLogger().warning("GitHub API returned status code " + response.statusCode() + " for URL: " + url);
             return null;
         }
         return response.body();
     }
 
-    private String findFirst(String body, Pattern pattern) {
-        Matcher matcher = pattern.matcher(body);
-        if (!matcher.find()) {
+    // Bezpieczniejsza metoda wyciągania pól z JSON bez zewnętrznych bibliotek
+    String extractJsonField(String json, String field) {
+        int index = json.indexOf("\"" + field + "\"");
+        if (index == -1)
             return "";
-        }
-        return matcher.group(1);
+
+        int colonIndex = json.indexOf(':', index);
+        if (colonIndex == -1)
+            return "";
+
+        int firstQuote = json.indexOf('"', colonIndex);
+        if (firstQuote == -1)
+            return "";
+
+        int secondQuote = json.indexOf('"', firstQuote + 1);
+        if (secondQuote == -1)
+            return "";
+
+        return json.substring(firstQuote + 1, secondQuote);
     }
 
     private String normalizeVersion(String version) {

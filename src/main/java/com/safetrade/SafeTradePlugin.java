@@ -5,6 +5,7 @@ import com.safetrade.listeners.SystemListener;
 import com.safetrade.trade.AdminTradeGUI;
 import com.safetrade.listeners.TradeListener;
 import com.safetrade.trade.TradeCashItem;
+import com.safetrade.trade.TradeCashStore;
 import com.safetrade.trade.TradeGUI;
 import com.safetrade.trade.TradeManager;
 import com.safetrade.trade.TradeMoneyGUI;
@@ -37,7 +38,7 @@ public final class SafeTradePlugin extends JavaPlugin {
         TradeGUI.init(this);
         TradeSafetyGUI.init(this);
         TradeMoneyGUI.init(this);
-        TradeCashItem.init(this);
+        TradeCashItem.init(this, new TradeCashStore(this));
         AdminTradeGUI.init(this);
         this.tradeManager = new TradeManager(this);
         this.versionChecker = new VersionChecker(this);
@@ -184,7 +185,7 @@ public final class SafeTradePlugin extends JavaPlugin {
                 return true;
             }
 
-            if (amount <= 0D) {
+            if (!Double.isFinite(amount) || amount <= 0D) {
                 player.sendMessage(prefixedComponent("messages.money-invalid", "&cEnter a valid amount."));
                 return true;
             }

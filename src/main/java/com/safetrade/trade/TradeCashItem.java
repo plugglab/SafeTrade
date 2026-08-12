@@ -1,12 +1,13 @@
 package com.safetrade.trade;
 
 import com.safetrade.SafeTradePlugin;
-import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.NamespacedKey;
+import org.bukkit.persistence.PersistentDataType;
 
 import java.util.List;
 
@@ -14,24 +15,32 @@ public final class TradeCashItem {
 
     private static final String IDENTIFIER = "SafeTradeCash";
     private static SafeTradePlugin plugin;
+    private static NamespacedKey cashKey;
+    private static NamespacedKey idKey;
+    private static TradeCashStore cashStore;
 
     private TradeCashItem() {
     }
 
-    public static void init(SafeTradePlugin pluginInstance) {
+    public static void init(SafeTradePlugin pluginInstance, TradeCashStore store) {
         plugin = pluginInstance;
+        cashKey = new NamespacedKey(plugin, "cash-paper");
+        idKey = new NamespacedKey(plugin, "cash-paper-id");
+        cashStore = store;
     }
 
     public static ItemStack create(double amount, String ownerName) {
         ItemStack item = new ItemStack(Material.PAPER);
         ItemMeta meta = item.getItemMeta();
         if (meta != null) {
-            meta.setDisplayName(color("&eTrade Cash"));
+            meta.setDisplayName(getText("messages.cash-item-name", "&eTrade Cash"));
             meta.setLore(List.of(
-                    color("&7Value: &a" + format(amount)),
-                    color("&7Owner: &f" + ownerName),
+                    getText("messages.cash-item-value-lore", "&7Value: &a{value}").replace("{value}", format(amount)),
+                    getText("messages.cash-item-owner-lore", "&7Owner: &f{owner}").replace("{owner}", ownerName),
                     color("&8" + IDENTIFIER)
             ));
+            meta.getPersistentDataContainer().set(cashKey, PersistentDataType.DOUBLE, amount);
+            meta.getPersistentDataContainer().set(idKey, PersistentDataType.STRING, cashStore.issue(amount));
             meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             item.setItemMeta(meta);
         }
@@ -44,10 +53,9 @@ public final class TradeCashItem {
         }
         ItemMeta meta = item.getItemMeta();
         return meta != null
-                && meta.hasLore()
-                && meta.getLore() != null
-                && !meta.getLore().isEmpty()
-                && meta.getLore().get(meta.getLore().size() - 1).contains(IDENTIFIER);
+                && cashKey != null && idKey != null
+                && meta.getPersistentDataContainer().has(cashKey, PersistentDataType.DOUBLE)
+                && meta.getPersistentDataContainer().has(idKey, PersistentDataType.STRING);
     }
 
     public static double getValue(ItemStack item) {
@@ -55,20 +63,23 @@ public final class TradeCashItem {
             return 0D;
         }
         ItemMeta meta = item.getItemMeta();
-        if (meta == null || meta.getLore() == null) {
+        if (meta == null || cashKey == null) {
             return 0D;
         }
-        for (String line : meta.getLore()) {
-            String stripped = ChatColor.stripColor(line);
-            if (stripped != null && stripped.startsWith("Value: ")) {
-                try {
-                    return Double.parseDouble(stripped.substring("Value: ".length()).trim());
-                } catch (NumberFormatException ignored) {
-                    return 0D;
-                }
-            }
+        String id = getId(item);
+        return id == null || cashStore == null ? 0D : cashStore.getRedeemableValue(id);
+    }
+
+    public static boolean markRedeemed(ItemStack item) {
+        String id = getId(item);
+        return id != null && cashStore != null && cashStore.markRedeemed(id);
+    }
+
+    private static String getId(ItemStack item) {
+        if (!isCash(item)) {
+            return null;
         }
-        return 0D;
+        return item.getItemMeta().getPersistentDataContainer().get(idKey, PersistentDataType.STRING);
     }
 
     private static String format(double amount) {
@@ -80,5 +91,9 @@ public final class TradeCashItem {
 
     private static String color(String text) {
         return plugin == null ? text : plugin.colorize(text);
+    }
+
+    private static String getText(String path, String fallback) {
+        return plugin == null ? color(fallback) : plugin.getText(path, fallback);
     }
 }

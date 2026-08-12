@@ -678,7 +678,7 @@ public class TradeManager {
             player.sendMessage(plugin.formatValuePrefixed("messages.money-too-high", "&cThat amount exceeds the limit: {value}", String.valueOf(max)));
             return false;
         }
-        if (amount <= 0D) {
+        if (!Double.isFinite(amount) || amount <= 0D) {
             player.sendMessage(plugin.getPrefixedText("messages.money-invalid", "&cEnter a valid amount."));
             return false;
         }
@@ -712,14 +712,14 @@ public class TradeManager {
     }
 
     public boolean withdrawMoney(Player player, double amount) {
-        if (amount <= 0D || !plugin.isVaultEnabled()) {
+        if (!Double.isFinite(amount) || amount <= 0D || !plugin.isVaultEnabled()) {
             return false;
         }
         return invokeEconomyBoolean("withdrawPlayer", new Class<?>[]{OfflinePlayer.class, double.class}, new Object[]{player, amount});
     }
 
     public boolean depositMoney(Player player, double amount) {
-        if (amount <= 0D || !plugin.isVaultEnabled()) {
+        if (!Double.isFinite(amount) || amount <= 0D || !plugin.isVaultEnabled()) {
             return false;
         }
         return invokeEconomyBoolean("depositPlayer", new Class<?>[]{OfflinePlayer.class, double.class}, new Object[]{player, amount});
@@ -734,7 +734,7 @@ public class TradeManager {
             sender.sendMessage(plugin.getPrefixedText("messages.vault-unavailable", "&cMoney trades are disabled because Vault is unavailable."));
             return false;
         }
-        if (amount <= 0D) {
+        if (!Double.isFinite(amount) || amount <= 0D) {
             sender.sendMessage(plugin.getPrefixedText("messages.money-invalid", "&cEnter a valid amount."));
             return false;
         }
@@ -779,7 +779,7 @@ public class TradeManager {
             }
         } catch (ReflectiveOperationException ignored) {
         }
-        return true;
+        return false;
     }
 
     private String formatCurrency(double amount) {
